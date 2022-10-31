@@ -19,6 +19,11 @@ use App\Http\Controllers\BookController;
 // });
 
 Route::get('/', [BookController::class,'index']);
-
 Route::get('/insert', [BookController::class,'insert']);
+Route::get('/insert2', [BookController::class,'insert2']);
+Route::get('/insert3', [BookController::class,'insert3']);
+Route::get('/delete', [BookController::class,'delete']);
+Route::get('/update', [BookController::class,'update']);
+Route::get('/select', [BookController::class,'select']);
+Route::get('/select2', [BookController::class,'select2']);
 // Route::get('/insert', [App\Http\Controllers\BookController::class,'insert']); //ini gabisa
