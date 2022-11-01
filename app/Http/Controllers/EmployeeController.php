@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App\Http\Controllers\EmployeeControler;
 use Carbon\Carbon;
+use Hamcrest\Core\AllOf;
 
 class EmployeeController extends Controller
 {
@@ -305,27 +306,30 @@ class EmployeeController extends Controller
 
     public function index() //buat tampilan
     {
-        $soalTest = DB::select();
-        $soal1 = DB::select("SELECT * FROM employees");
-        $soal2 = DB::select("SELECT * FROM employees");
-        $soal3 = DB::select("SELECT * FROM employees");
-        $soal4 = DB::select("SELECT * FROM employees");
-        $soal5 = DB::select("SELECT * FROM employees");
-        $soal6 = DB::select("SELECT * FROM employees");
-        $soal7 = DB::select("SELECT * FROM employees");
-        $soal8 = DB::select("SELECT * FROM employees");
-        $soal9 = DB::select("SELECT * FROM employees");
-        $soal10 = DB::select("SELECT * FROM employees");
-        $soal11 = DB::select("SELECT * FROM employees");
-        $soal12 = DB::select("SELECT * FROM employees");
-        $soal13 = DB::select("SELECT * FROM employees");
-        $soal14 = DB::select("SELECT * FROM employees");
-        $soal15 = DB::select("SELECT * FROM employees");
-        $soal16 = DB::select("SELECT * FROM employees");
-        $soal17 = DB::select("SELECT * FROM employees");
-        $soal18 = DB::select("SELECT * FROM employees");
-        $soal19 = DB::select("SELECT * FROM employees");
-        $soal20 = DB::select("SELECT * FROM employees");
+        $soal1 = DB::table("employees")->select('*')->get();
+        $soal2 = DB::table("employees")->select('*')->WHERE("tanggal_masuk","<","2018/01/01")->get();
+        $soal3 = DB::table("employees")->select('*')->WHERE("jabatan","=","manajer")->get();
+        $soal4 = DB::table("employees")->select('*')->WHERE("status","=","1")->get();
+        $soal5 = DB::table("employees")->select('*')->WHERE("jabatan","=","Staf")->WHERE("status","=","0")->get();
+        $soal6 = DB::table("employees")->select('*')->WHERE("nip","LIKE","GU%")->WHERE("tanggal_masuk",">","2018/12/31")->WHERE("tanggal_masuk","<","2020/01/01")->get();
+        $soal7 = DB::table("employees")->select('*')->get();
+        // $hitung7 = count($soal7);
+        $hitung7 = DB::table("employees")
+        ->select(DB::raw("COUNT(*) as count_row"))
+	    ->get();
+        $soal8 = DB::table("employees")->select('*')->get();
+        $soal9 = DB::table("employees")->select('*')->get();
+        $soal10 = DB::table("employees")->select('*')->get();
+        $soal11 = DB::table("employees")->select('*')->get();
+        $soal12 = DB::table("employees")->select('*')->get();
+        $soal13 = DB::table("employees")->select('*')->get();
+        $soal14 = DB::table("employees")->select('*')->get();
+        $soal15 = DB::table("employees")->select('*')->get();
+        $soal16 = DB::table("employees")->select('*')->get();
+        $soal17 = DB::table("employees")->select('*')->get();
+        $soal18 = DB::table("employees")->select('*')->get();
+        $soal19 = DB::table("employees")->select('*')->get();
+        $soal20 = DB::table("employees")->select('*')->get();
         return view('index', compact(
             'soal1',
             'soal2',
@@ -333,7 +337,7 @@ class EmployeeController extends Controller
             'soal4',
             'soal5',
             'soal6',
-            'soal7',
+            'hitung7',
             'soal8',
             'soal9',
             'soal10',
