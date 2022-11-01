@@ -307,11 +307,17 @@ class EmployeeController extends Controller
     public function index() //buat tampilan
     {
         $soal1 = DB::table("employees")->select('*')->get();
+
         $soal2 = DB::table("employees")->select('*')->WHERE("tanggal_masuk", "<", "2018/01/01")->get();
+
         $soal3 = DB::table("employees")->select('*')->WHERE("jabatan", "=", "manajer")->get();
+
         $soal4 = DB::table("employees")->select('*')->WHERE("status", "=", "1")->get();
+
         $soal5 = DB::table("employees")->select('*')->WHERE("jabatan", "=", "Staf")->WHERE("status", "=", "0")->get();
+
         $soal6 = DB::table("employees")->select('*')->WHERE("nip", "LIKE", "GU%")->WHERE("tanggal_masuk", ">", "2018/12/31")->WHERE("tanggal_masuk", "<", "2020/01/01")->get();
+
         $soal7 = DB::table("employees")->select('*')->get();
         $soal7 = count($soal7);
         // $soal7 = DB::table("employees")->select(DB::raw("COUNT(*) as Jumlah"))->get();
@@ -325,12 +331,12 @@ class EmployeeController extends Controller
         $hariini = now();
         $harilahir = DB::table("employees")->select('tanggal_lahir')->get();
         $harikerja8 = 0;
+        $today = Carbon::today()->format('m/d/Y');
 
 
         // $harikerja8 = $hariini - $harimasuk8;
         // $employees = Employee::whereBetween('hire_date', [Carbon::now(), Carbon::now()->addYear()])->get();
         // $harikerja8 = DB::table("employees")->whereBetween('tanggal_masuk', [Carbon::now(), Carbon::now()->addDays()]);
-        $today = Carbon::today()->format('m/d/Y');
         // $tes = strtotime($today);
         // $tes2 = getdate($harimasuk8);
 
@@ -346,16 +352,37 @@ class EmployeeController extends Controller
 
 
         $soal9 = DB::table("employees")->select(DB::raw('LEFT(nip, 2) as divisi'), DB::raw('count(*) as jumlah'))->groupBy('divisi')->having('divisi','LIKE','__%')->get();
+
         $soal10 = DB::table("employees")->select('jabatan', DB::raw('count(*) as jumlah'))->groupBy('jabatan')->get();
-        $soal11 = DB::table("employees")->select('*')->get();
-        $soal12 = DB::table("employees")->select('*')->get();
-        $soal13 = DB::table("employees")->select('*')->get();
-        $soal14 = DB::table("employees")->select('*')->get();
-        $soal15 = DB::table("employees")->select('*')->get();
-        $soal16 = DB::table("employees")->select('*')->get();
-        $soal17 = DB::table("employees")->select('*')->get();
-        $soal18 = DB::table("employees")->select('*')->get();
-        $soal19 = DB::table("employees")->select('*')->get();
+
+        $soal11 = DB::table("employees")->select('status', DB::raw('count(*) as jumlah'))->groupBy('status')->get();
+
+        $tgl12 = DB::table('employees')->min('tanggal_masuk');
+        $soal12 = DB::table('employees')->select('*')->where('tanggal_masuk','=',$tgl12)->get();
+
+        $tgl13 = DB::table('employees')->max('tanggal_masuk');
+        $soal13 = DB::table('employees')->select('*')->where('tanggal_masuk','=',$tgl13)->get();
+
+        $umur14 = DB::table('employees')->min('tanggal_lahir');
+        $kerja14 = DB::table('employees')->min('tanggal_masuk');
+        // $soal14 = DB::table('employees')->select('*')->where('tanggal_lahir','<=',$umur14)->where('tanggal_masuk','<=',$kerja14)->get();
+        // $soal14 = DB::table('employees')->select('*')->where('tanggal_masuk','<=',$kerja14)->get();
+        // $soal14 = DB::table('employees')->select('*')->where('tanggal_lahir','<=',$umur14)->get();
+        $soal14 = DB::table('employees')->select('*')->where('tanggal_lahir','<=',DB::table('employees')->min('tanggal_lahir'))->where('tanggal_masuk','<=',DB::table('employees')->min('tanggal_masuk'))->get();
+
+        $soal15 = DB::table('employees')->select('*')->where('tanggal_lahir','>=',DB::table('employees')->max('tanggal_lahir'))->where('tanggal_masuk','<=',DB::table('employees')->min('tanggal_masuk'))->get();
+
+        // $soal16 = DB::table("employees")->select('*')->get();
+        $soal16 = DB::table("employees")->select(DB::raw('LEFT(nip, 2) as divisi'), DB::raw('count(*) as jumlah'))->groupBy('divisi')->having('divisi','LIKE','__%')->get();
+        // $soal16 = DB::table("employees")->select(DB::raw('LEFT(nip, 2) as divisi'), DB::raw('count(*) as jumlah'))->groupBy('divisi')->having('divisi','LIKE','__%')->max('jumlah'); hasilnya 5
+        // $jumlah16 = DB::table("employees")->select(DB::raw('count(*) as jumlah'))->get();
+
+        $soal17 = DB::table("employees")->select(DB::raw('LEFT(nip, 2) as divisi'), DB::raw('count(*) as jumlah'))->groupBy('divisi')->having('divisi','LIKE','__%')->get();
+
+        $soal18 = DB::table("employees")->select(DB::raw('LEFT(nip, 2) as divisi'), 'status', DB::raw('count(*) as jumlah'))->groupBy('divisi','status')->having('divisi','LIKE','__%')->get();
+
+        $soal19 = DB::table("employees")->select(DB::raw('LEFT(nip, 2) as divisi'), 'jabatan', DB::raw('count(*) as jumlah'))->groupBy('divisi','jabatan')->having('divisi','LIKE','__%')->get();
+
         $soal20 = DB::table("employees")->select('*')->get();
         return view('index', compact(
             'soal1',
