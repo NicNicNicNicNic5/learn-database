@@ -307,19 +307,46 @@ class EmployeeController extends Controller
     public function index() //buat tampilan
     {
         $soal1 = DB::table("employees")->select('*')->get();
-        $soal2 = DB::table("employees")->select('*')->WHERE("tanggal_masuk","<","2018/01/01")->get();
-        $soal3 = DB::table("employees")->select('*')->WHERE("jabatan","=","manajer")->get();
-        $soal4 = DB::table("employees")->select('*')->WHERE("status","=","1")->get();
-        $soal5 = DB::table("employees")->select('*')->WHERE("jabatan","=","Staf")->WHERE("status","=","0")->get();
-        $soal6 = DB::table("employees")->select('*')->WHERE("nip","LIKE","GU%")->WHERE("tanggal_masuk",">","2018/12/31")->WHERE("tanggal_masuk","<","2020/01/01")->get();
+        $soal2 = DB::table("employees")->select('*')->WHERE("tanggal_masuk", "<", "2018/01/01")->get();
+        $soal3 = DB::table("employees")->select('*')->WHERE("jabatan", "=", "manajer")->get();
+        $soal4 = DB::table("employees")->select('*')->WHERE("status", "=", "1")->get();
+        $soal5 = DB::table("employees")->select('*')->WHERE("jabatan", "=", "Staf")->WHERE("status", "=", "0")->get();
+        $soal6 = DB::table("employees")->select('*')->WHERE("nip", "LIKE", "GU%")->WHERE("tanggal_masuk", ">", "2018/12/31")->WHERE("tanggal_masuk", "<", "2020/01/01")->get();
         $soal7 = DB::table("employees")->select('*')->get();
-        // $hitung7 = count($soal7);
-        $hitung7 = DB::table("employees")
-        ->select(DB::raw("COUNT(*) as count_row"))
-	    ->get();
-        $soal8 = DB::table("employees")->select('*')->get();
-        $soal9 = DB::table("employees")->select('*')->get();
-        $soal10 = DB::table("employees")->select('*')->get();
+        $soal7 = count($soal7);
+        // $soal7 = DB::table("employees")->select(DB::raw("COUNT(*) as Jumlah"))->get();
+        // $soal7 = DB::table("employees")->select("COUNT(*) as count_row")->get();
+        // return $soal7;
+        // dd($soal7);
+        // dump($soal7);
+
+        $soal8 = DB::table("employees")->select('nama_pegawai','tanggal_masuk')->get();
+        $harimasuk8 = DB::table("employees")->select('tanggal_masuk')->get();
+        $hariini = now();
+        $harilahir = DB::table("employees")->select('tanggal_lahir')->get();
+        $harikerja8 = 0;
+
+
+        // $harikerja8 = $hariini - $harimasuk8;
+        // $employees = Employee::whereBetween('hire_date', [Carbon::now(), Carbon::now()->addYear()])->get();
+        // $harikerja8 = DB::table("employees")->whereBetween('tanggal_masuk', [Carbon::now(), Carbon::now()->addDays()]);
+        $today = Carbon::today()->format('m/d/Y');
+        // $tes = strtotime($today);
+        // $tes2 = getdate($harimasuk8);
+
+        // $harikerja8 = $today - $harimasuk8;
+        // $harikerja8 = $today ->diff($harimasuk8);
+        // date_diff($harimasuk8,$tes4);
+
+        // $harikerja8 = count($soal8);
+        // $soal8 = DB::table("employees")->select('nama_pegawai', 'status')->get();
+        // $soal8 = DB::table("employees")->select('nama_pegawai', 'date_diff(now(), $harimasuk8')->get();
+        // $harikerja8 = date_diff(now(),now());
+        // $soal8 = DB::table("employees")->select('nama_pegawai')->select(date_diff(now(), ))->get();
+
+
+        $soal9 = DB::table("employees")->select(DB::raw('LEFT(nip, 2) as divisi'), DB::raw('count(*) as jumlah'))->groupBy('divisi')->having('divisi','LIKE','__%')->get();
+        $soal10 = DB::table("employees")->select('jabatan', DB::raw('count(*) as jumlah'))->groupBy('jabatan')->get();
         $soal11 = DB::table("employees")->select('*')->get();
         $soal12 = DB::table("employees")->select('*')->get();
         $soal13 = DB::table("employees")->select('*')->get();
@@ -337,8 +364,9 @@ class EmployeeController extends Controller
             'soal4',
             'soal5',
             'soal6',
-            'hitung7',
+            'soal7',
             'soal8',
+            'harikerja8',
             'soal9',
             'soal10',
             'soal11',

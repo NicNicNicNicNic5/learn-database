@@ -194,17 +194,14 @@
     <div class="container text-center p-4">
         <h1>Jawaban Soal 7</h1>
         <h4>Soal : Query jumlah data pegawai yang tersimpan di tabel</h4>
-        <h4>Query : </h4>
+        <h4>Query : $soal7 = DB::table("employees")->select('*')->get();<BR>
+            $soal7 = count($soal7);</h4>
         <table class="table ">
             <thead>
-                <th>Jumlah data</th>
+                <th>Jumlah Data</th>
             </thead>
             <tbody>
-                    {{-- {{ $soal7 }} --}}
-                    <?php
-                    print($hitung7);
-                    ?>
-
+                    <td> <?php print($soal7); ?> </tr>
             </tbody>
         </table>
     </div>
@@ -215,22 +212,16 @@
         <h4>Query : </h4>
         <table class="table ">
             <thead>
-                <th>nip</th>
                 <th>nama_pegawai</th>
-                <th>tanggal_lahir</th>
-                <th>jabatan</th>
-                <th>tanggal_masuk</th>
-                <th>status</th>
+                <th>total_hari_kerja</th>
             </thead>
             <tbody>
                 @forelse ($soal8 as $employee)
                     <tr>
-                        <td>{{ $employee->nip }}</td>
                         <td>{{ $employee->nama_pegawai }}</td>
-                        <td>{{ $employee->tanggal_lahir }}</td>
-                        <td>{{ $employee->jabatan }}</td>
-                        <td>{{ $employee->tanggal_masuk }}</td>
-                        <td>{{ $employee->status }}</td>
+                        <td>{{ $harikerja8 }}</td>
+                        {{-- <td>{{ $employee->tanggal_masuk }}</td> --}}
+                        {{-- {{ round((strtotime($harimasuk8->start_date) - time()) / 86400) }} --}}
                     </tr>
                 @empty
                     <div class="alert alert-dark d-inline-block">Tidak ada data!</div>
@@ -242,25 +233,17 @@
     <div class="container text-center p-4">
         <h1>Jawaban Soal 9</h1>
         <h4>Soal : Query jumlah pegawai menurut divisi</h4>
-        <h4>Query : </h4>
+        <h4>Query : $soal9 = DB::table("employees")->select(DB::raw('LEFT(nip, 2) as divisi'), DB::raw('count(*) as jumlah'))->groupBy('divisi')->having('divisi','LIKE','__%')->get();</h4>
         <table class="table ">
             <thead>
-                <th>nip</th>
-                <th>nama_pegawai</th>
-                <th>tanggal_lahir</th>
-                <th>jabatan</th>
-                <th>tanggal_masuk</th>
-                <th>status</th>
+                <th>divisi</th>
+                <th>jumlah</th>
             </thead>
             <tbody>
                 @forelse ($soal9 as $employee)
                     <tr>
-                        <td>{{ $employee->nip }}</td>
-                        <td>{{ $employee->nama_pegawai }}</td>
-                        <td>{{ $employee->tanggal_lahir }}</td>
-                        <td>{{ $employee->jabatan }}</td>
-                        <td>{{ $employee->tanggal_masuk }}</td>
-                        <td>{{ $employee->status }}</td>
+                        <td>{{ $employee->divisi }}</td>
+                        <td>{{ $employee->jumlah }}</td>
                     </tr>
                 @empty
                     <div class="alert alert-dark d-inline-block">Tidak ada data!</div>
@@ -272,29 +255,27 @@
     <div class="container text-center p-4">
         <h1>Jawaban Soal 10</h1>
         <h4>Soal : Query jumlah pegawai menurut jabatannya</h4>
-        <h4>Query : </h4>
+        <h4>Query : $soal10 = DB::table("employees")->select('jabatan', DB::raw('count(*) as jumlah'))->groupBy('jabatan')->get();</h4>
         <table class="table ">
             <thead>
-                <th>nip</th>
-                <th>nama_pegawai</th>
-                <th>tanggal_lahir</th>
                 <th>jabatan</th>
-                <th>tanggal_masuk</th>
-                <th>status</th>
+                <th>jumlah</th>
             </thead>
             <tbody>
                 @forelse ($soal10 as $employee)
                     <tr>
-                        <td>{{ $employee->nip }}</td>
+                        {{-- <td>{{ $employee->nip }}</td>
                         <td>{{ $employee->nama_pegawai }}</td>
-                        <td>{{ $employee->tanggal_lahir }}</td>
+                        <td>{{ $employee->tanggal_lahir }}</td> --}}
                         <td>{{ $employee->jabatan }}</td>
-                        <td>{{ $employee->tanggal_masuk }}</td>
-                        <td>{{ $employee->status }}</td>
+                        <td>{{ $employee->jumlah }}</td>
+                        {{-- <td>{{ $employee->tanggal_masuk }}</td>
+                        <td>{{ $employee->status }}</td> --}}
                     </tr>
-                @empty
+                    @empty
                     <div class="alert alert-dark d-inline-block">Tidak ada data!</div>
-                @endforelse
+                    @endforelse
+                    {{-- <td>{{ $soal10 }}</td> --}}
             </tbody>
         </table>
     </div>
