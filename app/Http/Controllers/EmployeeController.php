@@ -307,7 +307,7 @@ class EmployeeController extends Controller
     public function index() //buat tampilan
     {
         $soal1 = DB::table("employees")->select('*')->get();
-
+        //$result[] = DB::table('employees')->
         $soal2 = DB::table("employees")->select('*')->WHERE("tanggal_masuk", "<", "2018/01/01")->get();
 
         $soal3 = DB::table("employees")->select('*')->WHERE("jabatan", "=", "manajer")->get();
@@ -368,9 +368,17 @@ class EmployeeController extends Controller
         // $soal14 = DB::table('employees')->select('*')->where('tanggal_lahir','<=',$umur14)->where('tanggal_masuk','<=',$kerja14)->get();
         // $soal14 = DB::table('employees')->select('*')->where('tanggal_masuk','<=',$kerja14)->get();
         // $soal14 = DB::table('employees')->select('*')->where('tanggal_lahir','<=',$umur14)->get();
+
+        // jawaban sendiri
         $soal14 = DB::table('employees')->select('*')->where('tanggal_lahir','<=',DB::table('employees')->min('tanggal_lahir'))->where('tanggal_masuk','<=',DB::table('employees')->min('tanggal_masuk'))->get();
 
+        //jawaban dosen
+        // $soal14[] = DB::table('employees')->orderByRaw('DATEDIFF(NOW(), tanggal_lahir) + DATEDIFF(NOW(), tanggal_masuk) DESC')->take(1)->get();
+
         $soal15 = DB::table('employees')->select('*')->where('tanggal_lahir','>=',DB::table('employees')->max('tanggal_lahir'))->where('tanggal_masuk','<=',DB::table('employees')->min('tanggal_masuk'))->get();
+
+        //jawaban dosen
+        // $soal15[] = DB::table('employees')->orderByRaw('DATEDIFF(NOW(), tanggal_lahir) - DATEDIFF(NOW(), tanggal_masuk) DESC')->take(1)->get();
 
         // $soal16 = DB::table("employees")->select('*')->get();
         $soal16 = DB::table("employees")->select(DB::raw('LEFT(nip, 2) as divisi'), DB::raw('count(*) as jumlah'))->groupBy('divisi')->having('divisi','LIKE','__%')->get();
@@ -383,7 +391,18 @@ class EmployeeController extends Controller
 
         $soal19 = DB::table("employees")->select(DB::raw('LEFT(nip, 2) as divisi'), 'jabatan', DB::raw('count(*) as jumlah'))->groupBy('divisi','jabatan')->having('divisi','LIKE','__%')->get();
 
+        //jawaban sendiri
         $soal20 = DB::table("employees")->select('*')->get();
+
+        //jawaban dosen
+        // $soal20[] = DB::table('employees')->select(DB::raw('
+        // SUM(IF(TIMESTAMPDIFF(YEAR, tanggal_lahir, NOW()) < 25, 1, 0)) AS under_25,
+        // SUM(IF(TIMESTAMPDIFF(YEAR, tanggal_lahir, NOW()) BETWEEN 25 AND 35, 1, 0)) AS 25_35,
+        // SUM(IF(TIMESTAMPDIFF(YEAR, tanggal_lahir, NOW()) BETWEEN 36 AND 45, 1, 0)) AS 36_45,
+        // SUM(IF(TIMESTAMPDIFF(YEAR, tanggal_lahir, NOW()) BETWEEN 46 AND 55, 1, 0)) AS 46_55,
+        // SUM(IF(TIMESTAMPDIFF(YEAR, tanggal_lahir, NOW()) > 55, 1, 0)) AS above_55,
+        // '))->get();
+
         return view('index', compact(
             'soal1',
             'soal2',

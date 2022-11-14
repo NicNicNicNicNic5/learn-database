@@ -2,175 +2,274 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Book;
+use App\Models\Selling;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\App\Http\Controllers\BooksControler;
-use Carbon\Carbon;
+use Error; //error yang generic / umum
+use PDO;
 
 class BookController extends Controller
 {
-    // public function index() //buat data
-    // {
-    //     //select
-    //     $books = DB::table("books")->
-    //     select('judul')->
-    //     where('harga', '>=', '0')->
-    //     orderByDesc('harga')->
-    //     get();
-    //     dd($books);
-    //     return view('booklist', compact('books'));
-
-    //     // dump($books);
-    //     // return view('booklist', ['books' => [$books]]);
-    // }
-
-    public function index() //buat tampilan
+    public function select()
     {
-        //teknis dasar melakukan query di laravel
-        //select
-        $books = DB::select("SELECT * FROM books"); //syntax sql dalam bentuk string
+        $book = Book::find(4);
 
-        // dump($books);
-        return view('booklist', compact('books'));
+        // //tampilin semua dari book
+        // dump($book);
+        // //tampilin semua dari book sebagai selling
+        // dump($book->selling);
+
+        //tampilin buku beserta kategorinya 1 per 1
+        echo "<h3>" . $book->judul . "</h3>";
+        echo "<p>";
+        echo "harga: " . $book->harga . "<br>";
+        echo "halaman: " . $book->halaman . "<br>";
+        echo "Pendapatan penjualan: " . $book->selling->acc_earnings . "<br>";
+        echo "Buku terjual: " . $book->selling->acc_sold_count . "<br>";
+        echo "Rata-rata nilai jual buku: " . ($book->selling->acc_earnings / $book->selling->acc_sold_count);
+        echo "</p>";
+
+        //nama teknik = lazy loading
+        //select all dari 1 tabel, smua data dari 1 tabel itu kita select lagi ke tabel yg berelasi
+        //select * from books;
+        //select * from sellings where book_id = n;
+        // $allBooks = Book::all();
+
+        //nama teknik = eager loading
+        //select * from bookk where id IN (select id from selling);
+        $allBooks = Book::with('selling')->get();
+        dump($allBooks);
+
+        //nyari semua buku yang punya relasi selling
+        $allBooks = Book::has('selling')->get();
+        dump($allBooks);
+
+        //nyari semua buku yang ga punya relasi selling
+        $allBooks = Book::doesntHave('selling')->get();
+        dump($allBooks);
+
+        //filter semua buku yang punya relasi selling DAN pakai fitur where terhadap data yang berelasi
+        $allBooks = Book::whereHas('selling', function ($row) {
+            $row->where('acc_earnings', '<', 1000000);
+        })->get();
+        dump($allBooks);
+
+        //tampilin semua buku yang punya relasi selling dengan yang memiliki selling (?)
+        $allBooks = Book::with('selling')->has('selling')->get();
+        dump($allBooks);
     }
 
     public function insert()
     {
-        // //manual
-        // $result = DB::insert("INSERT INTO books (judul, halaman, isbn, kategori, penerbit, harga, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())", [
-        //     "Buku Nikah",
-        //     "10",
-        //     "1234567890123",
-        //     "rumah tangga",
-        //     "kua",
-        //     "0.05"
-        // ]); //? = placeholder dari preparedStatement
+        // $book = new Book();
+        // $book->judul = "Buku Baru";
+        // $book->harga = 10000;
+        // $book->halaman = 10;
+        // //nginput biasa (yg ada pk)
+        // $book->save(); //secara ORM
 
-        // dump($result);
+        // $selling = new Selling();
+        // $selling->acc_earnings = 1000000;
+        // $selling->acc_sold_count = 100;
+        // //nginput table yang ada fknya
+        // $book->selling()->save($selling);
 
-        //binding
-        $result = DB::insert("INSERT INTO books (judul, halaman, isbn, kategori, penerbit, harga, created_at) VALUES (:judul, :halaman, :isbn, :kategori, :penerbit, :harga, NOW())", [
-            "judul" => "Closers",
-            "halaman" => "100",
-            "isbn" => "1234567890123",
-            "kategori" => "game",
-            "penerbit" => "nadek",
-            "harga" => "0.05"
-        ]); //? = placeholder dari preparedStatement
+        // echo "Data buku " . $book->judul . " tersimpan dengan jumlah buku terjual sebanyak " . $book->selling->acc_sold_count;
 
-        dump($result);
+        //errorrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+        //mass assignment
+        $book = Book::create([
+            "judul" => "Buku Baru #2",
+            "harga" => 120000,
+            "halaman" => 50
+        ]);
 
-        // //manual2
-        // $result = DB::insert("INSERT INTO books (judul, halaman, isbn, kategori, penerbit, harga, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [
-        //     "Food by Fire",
-        //     "10",
-        //     "1234567890123",
-        //     "rumah tangga",
-        //     "kua",
-        //     "0.05",
-        //     Carbon::now(),
-        //     Carbon::now()
-        // ]); //? = placeholder dari preparedStatement
+        $book->selling()->create(
+            [
+                "acc_earnings" => 1000000,
+                "acc_sold_count" => 100
+            ]
+        );
 
-        // dump($result);
+        echo "Data buku <b>" . $book->judul . "</b> tersimpan dengan jumlah buku terjual sebanyak " . $book->selling->acc_sold_count;
+    }
+
+    public function update()
+    {
+        //mass assignment
+        // $book = Book::find(3);
+        // $book-> selling()->update([
+        //     "acc_sold_count"=>300
+        // ]);
+
+        // echo "buku <b>" . $book->judul . "</b> terjual sebanyak " . $book->selling->acc_sold_count;
+
+        //update dengan pake pencegahan
+        // $book = Book::find(1);
+
+        // if($book->selling){
+        //     $book->selling()->update([
+        //         "acc_sold_count"=>300
+        //     ]);
+
+
+        //     echo "buku <b>" . $book->judul . "</b> terjual sebanyak " . $book->selling->acc_sold_count;
+        // } else {
+        //     echo "Data buku <b>" . $book->judul . "</b> tidak ada data penjualan!";
+        // }
+
+        //update push (normal ORM)
+        $bookToUpdate = Book::find(3); //atau where
+
+        $bookToUpdate->selling->acc_earnings = 5000000;
+        //push terhadap data parrent
+        $bookToUpdate->push();
     }
 
     public function delete()
     {
-        $result = DB::delete("DELETE FROM books WHERE judul = ?", ['buku nikah']);
+        //delete normal
+        $book = Book::find(3);
+        $book->selling->delete(); //menghapus data selling saja
+        $book->delete(); //menghapus data book saja (ada urutannya, fk dlu baru pk)
 
-        dump($result);
-    }
+        //pakai pencegahan
+        $book = Book::find(1);
+        if ($book->selling) {
+            $book->selling->delete();
+        }
+        $book->delete();
 
-    // public function delete(){
-    //     $result = DB::delete("DELETE FROM books WHERE judul = 'buku nikah'");
+        //pake onDelete('cascade'); di migration fknya
+        $book = Book::find(2);
+        $book->delete();
 
-    //     dump($result);
-    // }
+        //*CATATAN
+        //kenapa pas didelete, di selling ilang tapi di books ga ilang
 
-    public function update()
-    {
-        $result = DB::update(
-            "UPDATE books SET kategori = '  Cooking' WHERE ISBN = ?",
-            ['9781592339754']
-        );
-        dump($result);
-    }
+        //struktur tabelnya beda, si data books pake softdelete, si selling ga pake softdelete
+        //proses softdelete TIDAK MEMANGGIL query delete (sebenarnya query yg berjalan adalah update -> set). karna meng"update" jadi tidak hilang
 
-    public function statement()
-    {
-        $result = DB::statement("TRUNCATE books");
-        return ('Tabel sudah kosong!');
-    }
-
-    public function select()
-    {
-        $result = DB::table('books')->get();
-        return view('booklist', ['books' => $result]);
-    }
-
-    public function insert2()
-    {
-        // ...
-        $result = DB::table('books')->insert2([
-            [
-                'judul' => 'The Bench',
-                'ISBN' => '9780593434512',
-                'kategori' => 'Growing Up & Facts of Life',
-                'harga' => 181500,
-                'halaman' => 40,
-                'penerbit' => 'Random House Books for Young Readers'
-            ],
-            [
-                'judul' => 'Economic Dignity',
-                'ISBN' => '9781984879875',
-                'kategori' => 'Business & Leadership',
-                'harga' => 222900,
-                'halaman' => 384,
-                'penerbit' => 'Penguin Press'
-            ],
-            [
-                'judul' => 'Food by Fire: Grilling and BBQ with Derek Wolf of Over the Fire Cooking',
-                'ISBN' => '9781592339754',
-                'kategori' => 'Meat Cooking',
-                'harga' => 310750,
-                'halaman' => 208,
-                'penerbit' => 'Harvard Common Press'
-            ],
-            [
-                'judul' => 'The 4-Hour Workweek: Escape 9-5, Live Anywhere, and Join the New Rich',
-                'ISBN' => '9780307465351',
-                'kategori' => 'Self-Improvement',
-                'harga' => 253500,
-                'halaman' => 448,
-                'penerbit' => 'Harmony'
-            ]
-        ]);
-    }
-
-    public function select2()
-    {
-        $result = DB::table('books')->where('harga', '>', 200000)->orderBy(
-            'harga',
-            'desc'
-        )->get();
-        return view('booklist', ['books' => $result]);
-    }
-
-    public function insert3()
-    {
-        $result = DB::table('books')->insert3(
-            [
-                [
-                    'judul' => 'Economic Dignity',
-                    'ISBN' => '9781984879875',
-                    'kategori' => 'Business & Leadership',
-                    'harga' => 222900,
-                    'halaman' => 384,
-                    'penerbit' => 'Penguin Press'
-                ]
-            ]
-        );
-        dump($result);
+        //kalau ingin hilang, harus menghilangkan softdelete di migration books dan importan model books
+        //kalau menggunakan softdeletes, akan kehilangan fitur onDelete('cascade') di migration fk;
+        //cara ngakalin : proses delete manual, dicek dulu, bisa panggil force delete();
     }
 }
+
+//
+// BOOK CONTROLLER LAMA
+//
+
+// class BookController extends Controller
+// {
+//     public function insert()
+//     {
+//         // $book = new Book();
+
+//         // $book->judul = "Buku #1";
+//         // $book->halaman = 100;
+//         // $book->penerbit = "ANDI";
+//         // $book->harga = 100000;
+//         // $book->isbn = "1234567890123";
+//         // $book->kategori = "Undang-Undang";
+//         // //baru melengkapi object, belum masuk ke database
+
+//         // $book->save();
+
+//         Book::create( //teknik mass assignment, harus tambahin di model, blom bisa banyak skaligus, pake array jg gagal
+//             [
+//                 //case sensitive
+//                 'judul' => 'The Bench',
+//                 'isbn' => '9780597434512',
+//                 'kategori' => 'Growing Up & Facts of Life',
+//                 'harga' => 181500,
+//                 'halaman' => 40,
+//                 'penerbit' => 'Random House Books for Young Readers'
+//             ]
+//         );
+//     }
+
+//     public function update()
+//     {
+//         // $book = Book::find(1);//harus pake idnya, cari tabel yg idnya 1 di model Book
+//         // $book->judul = "Buku Bagus";
+//         // $book->harga = 250000;
+
+
+//         // $book = Book::where('isbn', '1234567890123')->first();//where = array of object, klo yakin cuma ada 1 data, pake function first(), klo banyak bisa pake for atau apapun yg bentuknya perulangan
+//         // $book->judul = "Buku Jelek";
+//         // $book->harga = 350000;
+
+//         // $books = Book::where('harga', '<', 200000)->get(); //dapetin array of object collection, rundownnya lama dan berulang-ulang
+//         // foreach($books as $book){
+//         //     $book->judul = "Buku Saya";
+//         //     $book->harga *= 1.5;
+//         // }
+
+//         // $book->save();
+//         // dump($book);
+
+//         Book::where('isbn', '1234567890123')->first()->update([
+//             'judul' => "Buku Bagus",
+//             'harga' => 100000
+//         ]);
+//     }
+
+//     public function delete()
+//     {
+//         Book::find(1)->delete();//find dulu, kalo ada ya jalan, kalo ga ada ya error, id not found
+
+//         // Book::destroy(1);//ga ada error, aman, bisa masukin lebih dari 1 id yang mau dihapus, tinggal masukin sebagai array
+//         // echo Book::destroy(1);
+
+//         // try {
+//         //     Book::find(1)->delete();
+//         // } catch (Error $error) {
+//         //     echo "Error nih";
+//         // }
+//     }
+
+//     public function select()
+//     {
+//         $result = Book::all(); //select all array of collection object
+
+//         $result = Book::where('harga', '<', 200000)->get();
+
+//         // $result = Book::latest()->get();
+
+//         // $result = Book::withTrashed()->get();
+
+//         foreach ($result as $book) {
+//             echo "Judul buku: " . $book->judul . "<br>";
+//         }
+
+
+//         dump($result);
+//     }
+
+//     public function latest()
+//     {
+//         $result = Book::latest()->get(); // tampilin semua data diurutkan dari data yang terakhir kali diinputkan
+//     }
+
+//     public function softdelete()
+//     //ngehapus data tapi data dari database tetep ada, yang bikin ga adanya ketika kita melakukan query, ketauannya dari 1 kolom baru dari tabel yang ngasih tau waktu kapan terakhir dihapus
+//     //tambahkan function softDeletes(); di migration
+//     //di function delete tambahkan //Book::find(1)->delete();
+//     //tambahkan //use SoftDeletes; di book.php (model)
+//     //pastikan di book.php bagian atas terdapat //use Illuminate\Database\Eloquent\SoftDeletes;
+//     {
+
+//     }
+
+//     public function restore(){
+//         //ngambil data yang uda dihapus bisa pake find / where
+//         Book::withTrashed()->find(1)->restore();
+//     }
+// }
+
+// //nanya date diff, cara ngurangin tanggal, ato cari selisih hari dari awal masuk kerja sampai sekarang
+
+// //raw query = mudah, tpi problemnya sangat beresiko kalo kesusup si aplikasinya, istilah dihacking = SQL injection, hacker bisa nyusup lewat html, ketrigger lewat javascript, keambil ke backend(php), bisa ngelakuin reverse creater scaling, masuk ke project, ketrigger, baca sourcecode.
+// //query builder = tengah2, kalo ada query yg komplek, ky subquery, join, agak sulit untuk pakai query builder, convenience tapi terbatas, hanya untuk yg umum
+// //eloquent = paling efisien, tapi bergantung pada cara kerja si laravel, harus dipastiin bahwa data yg diolah harus biubah jadi collection dulu!

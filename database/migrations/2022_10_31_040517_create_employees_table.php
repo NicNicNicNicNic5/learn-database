@@ -14,13 +14,23 @@ class CreateEmployeesTable extends Migration
     public function up()
     {
         Schema::create('employees', function (Blueprint $table) {
-            $table->string('nip', 5)->uniquq();
+            $table->string('nip', 5)->unique();
             $table->string('nama_pegawai');
             $table->date('tanggal_lahir');
             $table->string('jabatan');
             $table->date('tanggal_masuk');
             $table->char('status', 1);
         });
+
+        //harusnya gini
+        // Schema::create('employees', function (Blueprint $table) {
+        //     $table->char('nip', 5)->primary();
+        //     $table->string('nama_pegawai');
+        //     $table->date('tanggal_lahir');
+        //     $table->string('jabatan');
+        //     $table->date('tanggal_masuk');
+        //     $table->char('status', 1);
+        // });
     }
 
     /**
