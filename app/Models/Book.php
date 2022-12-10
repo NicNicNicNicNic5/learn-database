@@ -20,4 +20,8 @@ class Book extends Model //fillalble dan guarded gabole bareng
     public function selling() {
         return $this->hasOne('App\Models\Selling');
     }
+
+    public function categories(){
+        return $this->belongsToMany('App\Models\Category')->withTimestamps();
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
+use App\Models\Category;
 use App\Models\Selling;
 use Illuminate\Http\Request;
 use Error; //error yang generic / umum
@@ -153,6 +154,47 @@ class BookController extends Controller
         //kalau ingin hilang, harus menghilangkan softdelete di migration books dan importan model books
         //kalau menggunakan softdeletes, akan kehilangan fitur onDelete('cascade') di migration fk;
         //cara ngakalin : proses delete manual, dicek dulu, bisa panggil force delete();
+    }
+
+    public function attach()
+    {
+        $book = Book::find(2);
+        $category = Category::find(1);
+
+        $book->categories()->attach($category);
+        echo "Buku yang berjudul " . $book->judul . "masuk ke kategori <b>" . $category->nama . "</b>";
+
+        $book2 = Book::find(5);
+        $categories = Category::find([1, 2, 4]);
+
+        $book2->categories()->attach($categories);
+    }
+
+    public function detach()
+    {
+        $book = Book::find(2);
+        $category = Category::find(1);
+
+        $book->categories()->detach($category);
+        echo "$book->judul dihapus dari kategori <b>$category->nama</b>";
+    }
+
+    public function sync(){
+        $book = Book::find(7);
+        $categories = Category::find([1,4]);
+
+        //sync and auto detach
+        // $book->categories()->sync($categories);
+
+        //sync without detaching
+        $book->categories()->syncWithoutDetaching($categories);
+    }
+
+    public function toggle(){
+        //selama object tujuannya sama :
+        //kalo ada relasi, dibuang, kalo ga ada, dibuat
+        $book = Book::find(7);
+        $book->categories()->toggle(Category::find(1));
     }
 }
 
